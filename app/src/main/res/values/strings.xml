@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CustomizableForm</string>
+    <string name="add_comment">Add comment?</string>
+</resources>
