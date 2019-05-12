@@ -78,6 +78,9 @@ public class FormAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public void updateImageAt(int photoClickPosition, String imageUrl) {
-
+        PhotoModel photoModel = (PhotoModel) formItemModels.get(photoClickPosition);
+        photoModel.setUrl(imageUrl);
+        formItemModels.set(photoClickPosition, photoModel);
+        notifyItemChanged(photoClickPosition);
     }
 }

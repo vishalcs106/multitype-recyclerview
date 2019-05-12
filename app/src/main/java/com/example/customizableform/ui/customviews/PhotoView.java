@@ -101,4 +101,8 @@ public class PhotoView extends RelativeLayout {
     public String getImageUrl() {
         return imageUrl;
     }
+
+    public void setImage(String url) {
+
+    }
 }
