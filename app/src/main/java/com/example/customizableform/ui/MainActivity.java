@@ -2,31 +2,40 @@ package com.example.customizableform.ui;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.TextView;
 
-import com.cloudinary.android.MediaManager;
-import com.cloudinary.android.callback.ErrorInfo;
-import com.cloudinary.android.callback.UploadCallback;
 import com.example.customizableform.R;
 import com.example.customizableform.interfaces.ImageUpLoadListener;
-import com.example.customizableform.interfaces.OpenGalleryListener;
+import com.example.customizableform.interfaces.PhotoViewListener;
 import com.example.customizableform.models.BaseFormItemModel;
+import com.example.customizableform.models.CommentModel;
+import com.example.customizableform.models.PhotoModel;
+import com.example.customizableform.models.SingleChoiceModel;
 import com.example.customizableform.utils.AssetJsonReader;
 import com.example.customizableform.utils.GalleryToCloudinaryHelper;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,15 +46,20 @@ public class MainActivity extends AppCompatActivity {
     private FormAdapter adapter;
     private List<BaseFormItemModel> formItemModels = new ArrayList<>();
 
-    private OpenGalleryListener openGalleryListener = new OpenGalleryListener() {
+    private PhotoViewListener photoViewListener = new PhotoViewListener() {
         @Override
         public void openGallery(int position) {
             photoClickPosition = position;
             if(checkPermissionForReadExtertalStorage()) {
-                openGallery(position);
+                openImagePicker();
             } else {
                 requestPermissionForReadExtertalStorage();
             }
+        }
+
+        @Override
+        public void clearPhoto(int position) {
+            adapter.updateImageAt(position, "");
         }
     };
 
@@ -53,12 +67,39 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
         formItemModels = new AssetJsonReader().readJsonAndReturnList(this);
-        adapter = new FormAdapter(formItemModels);
-        adapter.setOpenGalleryListener(openGalleryListener);
+       initRecyclerview();
     }
 
-    private void openGallery(){
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_submit:
+                prepareJson();
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
+    private void initRecyclerview() {
+        adapter = new FormAdapter(formItemModels);
+        adapter.setPhotoViewListener(photoViewListener);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void openImagePicker(){
         Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
         getIntent.setType("image/*");
 
@@ -71,6 +112,36 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(chooserIntent, 22);
     }
 
+    private void prepareJson(){
+        JSONArray jsonObject = new JSONArray();
+        formItemModels = adapter.getFormList();
+        for(BaseFormItemModel baseFormItemModel : formItemModels){
+            if(baseFormItemModel instanceof PhotoModel){
+                PhotoModel photoModel = (PhotoModel) baseFormItemModel;
+                jsonObject.put(photoModel.getJson());
+            }
+             else if(baseFormItemModel instanceof CommentModel){
+                CommentModel commentModel = (CommentModel) baseFormItemModel;
+                jsonObject.put(commentModel.getJson());
+            }
+             else if(baseFormItemModel instanceof SingleChoiceModel){
+                SingleChoiceModel singleChoiceModel = (SingleChoiceModel) baseFormItemModel;
+                jsonObject.put(singleChoiceModel.getJson());
+            }
+        }
+        Dialog dialog = new Dialog(this, R.style.WideDialog);
+        dialog.setContentView(R.layout.pretty_json_dialog);
+        TextView textView = dialog.findViewById(R.id.json);
+        try {
+            textView.setText(jsonObject.toString(2));
+            textView.setTextColor(getResources().getColor(android.R.color.black));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        dialog.setCancelable(true);
+        dialog.show();
+    }
+
 
 
     public boolean checkPermissionForReadExtertalStorage() {
@@ -81,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-
     public void requestPermissionForReadExtertalStorage() {
         try {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -91,7 +161,6 @@ public class MainActivity extends AppCompatActivity {
             throw e;
         }
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -117,8 +186,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
-
-
 }

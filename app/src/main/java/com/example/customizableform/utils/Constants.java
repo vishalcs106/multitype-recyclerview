@@ -15,4 +15,6 @@ public interface Constants {
     int ITEM_TYPE_SINGLE_CHOICE = 1;
     int ITEM_TYPE_COMMENT = 2;
     String KEY_URL = "url";
+    String KEY_PUBLIC_ID = "public_id";
+    String KEY_SELECTION = "selection";
 }

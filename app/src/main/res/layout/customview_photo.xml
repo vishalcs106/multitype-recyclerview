@@ -4,17 +4,23 @@
     android:layout_height="wrap_content"
     android:padding="16dp">
 
+    <TextView
+        android:id="@+id/title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <RelativeLayout
-        android:layout_width="140dp"
-        android:layout_height="140dp"
-        android:layout_centerInParent="true">
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/title_tv"
+        android:background="#ddd">
 
         <ImageView
             android:id="@+id/photo_iv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="16dp"
-            android:background="#ddd" />
+            android:layout_margin="16dp" />
 
         <ImageView
             android:id="@+id/clear_iv"

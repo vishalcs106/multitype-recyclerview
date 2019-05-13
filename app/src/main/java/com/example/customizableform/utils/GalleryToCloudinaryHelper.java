@@ -75,7 +75,8 @@ public class GalleryToCloudinaryHelper {
             }
             @Override
             public void onSuccess(String requestId, Map resultData) {
-                imageUpLoadListener.uploadSuccess((String) resultData.get(Constants.KEY_URL));
+                System.out.print("");
+                imageUpLoadListener.uploadSuccess((String) resultData.get(Constants.KEY_PUBLIC_ID));
             }
             @Override
             public void onError(String requestId, ErrorInfo error) {

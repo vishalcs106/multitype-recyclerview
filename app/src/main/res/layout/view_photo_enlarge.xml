@@ -5,7 +5,7 @@
     android:background="#80000000">
 
     <ImageView
-        android:id="@+id/photo_iv"
+        android:id="@+id/enlarged_photo_iv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="32dp"/>

@@ -3,18 +3,21 @@ package com.example.customizableform.ui.customviews;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.customizableform.R;
-import com.example.customizableform.interfaces.OpenGalleryListener;
+import com.example.customizableform.interfaces.PhotoViewListener;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class PhotoView extends RelativeLayout {
@@ -24,9 +27,11 @@ public class PhotoView extends RelativeLayout {
     ImageView clearIcon;
     @BindView(R.id.progressbar)
     ProgressBar progressBar;
+    @BindView(R.id.title_tv)
+    TextView titleTv;
 
-    private OpenGalleryListener openGalleryListener;
-
+    private PhotoViewListener photoViewListener;
+    private int position;
     private String imageUrl = "";
     public PhotoView(Context context) {
         super(context);
@@ -43,15 +48,19 @@ public class PhotoView extends RelativeLayout {
         init();
     }
 
-    public void setOpenGalleryListener(OpenGalleryListener openGalleryListener) {
-        this.openGalleryListener = openGalleryListener;
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public void setPhotoViewListener(PhotoViewListener photoViewListener) {
+        this.photoViewListener = photoViewListener;
     }
 
     @OnClick({R.id.clear_iv, R.id.photo_iv})
     public void onCLick(View view){
         switch (view.getId()){
             case R.id.clear_iv:
-                clearPhoto();
+                clearImage();
                 break;
             case R.id.photo_iv:
                 photoClicked();
@@ -59,10 +68,6 @@ public class PhotoView extends RelativeLayout {
         }
     }
 
-    private void clearPhoto(){
-        imageUrl = "";
-        clearIcon.setVisibility(GONE);
-    }
 
     private void photoClicked(){
         if(TextUtils.isEmpty(imageUrl)){
@@ -75,26 +80,32 @@ public class PhotoView extends RelativeLayout {
     private void enlargeImage() {
         Context context = getContext();
         if(context != null && !((Activity)context).isFinishing()) {
-            final Dialog dialog = new Dialog(getContext());
+            final Dialog dialog = new Dialog(getContext(), R.style.WideDialog);
             dialog.setContentView(R.layout.view_photo_enlarge);
+            String imgurl = "https://res.cloudinary.com/db7iorevu/image/upload/"+"w_600,h_1000/"+imageUrl;
+            Glide.with(context).load(imgurl).centerCrop().into((ImageView) dialog.findViewById(R.id.enlarged_photo_iv));
             dialog.findViewById(R.id.close_iv).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     dialog.dismiss();
                 }
             });
+            dialog.show();
         }
 
     }
 
     private void openImagePicker() {
-       openGalleryListener.openGallery();
+       photoViewListener.openGallery(position);
        progressBar.setVisibility(VISIBLE);
     }
 
 
     private void init() {
-
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.customview_photo, this, true);
+        ButterKnife.bind(this, view);
+        if(TextUtils.isEmpty(imageUrl))
+            clearImage();
     }
 
 
@@ -103,6 +114,28 @@ public class PhotoView extends RelativeLayout {
     }
 
     public void setImage(String url) {
+        imageUrl = url;
+        progressBar.setVisibility(GONE);
+        if(!TextUtils.isEmpty(url)) {
+            clearIcon.setVisibility(VISIBLE);
+            String imgurl = "https://res.cloudinary.com/db7iorevu/image/upload/"+"w_200,h_200/"+url;
+            Glide.with(getContext()).load(imgurl).centerCrop().into(photoIv);
+        } else{
+            clearImage();
+        }
+    }
 
+    public void clearImage(){
+        photoIv.setImageResource(0);
+        clearIcon.setVisibility(GONE);
+        progressBar.setVisibility(GONE);
+        if(photoViewListener != null && !TextUtils.isEmpty(imageUrl)) {
+            photoViewListener.clearPhoto(position);
+        }
+        imageUrl = "";
+    }
+
+    public void setTitle(String title) {
+        titleTv.setText(title);
     }
 }

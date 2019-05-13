@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import com.example.customizableform.R;
+import com.example.customizableform.interfaces.CommentViewListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -22,6 +23,8 @@ public class CommentView extends RelativeLayout {
 
     private String comment = "";
     private boolean isCommentOn = false;
+    private int position;
+    private CommentViewListener commentViewListener;
 
     public CommentView(Context context) {
         super(context);
@@ -38,9 +41,18 @@ public class CommentView extends RelativeLayout {
         init();
     }
 
+    public void setCommentViewListener(CommentViewListener commentViewListener) {
+        this.commentViewListener = commentViewListener;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
     @OnCheckedChanged(R.id.comment_switch)
     public void switchToggeled(CompoundButton commentSwitch, boolean isCommentOn){
         this.isCommentOn = isCommentOn;
+        commentViewListener.onCommentSwitchChange(position, isCommentOn);
         if(isCommentOn){
             commentEt.setVisibility(VISIBLE);
         } else {
@@ -51,6 +63,7 @@ public class CommentView extends RelativeLayout {
     @OnTextChanged(value = R.id.comment_et, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
     public void commentTextChange(CharSequence text) {
         comment = text.toString();
+        commentViewListener.onCommentTextChanged(position, comment);
     }
 
     private void init(){
