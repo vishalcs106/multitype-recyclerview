@@ -23,7 +23,7 @@ public class SingleChoiceViewHolder extends RecyclerView.ViewHolder {
         singleChoiceView.setPosition(getAdapterPosition());
         singleChoiceView.setChoiceSelectionListener(choiceSelectionListener);
         singleChoiceView.setTitle(singleChoiceModel.getTitle());
-        singleChoiceView.setChoices(singleChoiceModel.getOptions());
+        singleChoiceView.setChoices(singleChoiceModel.getOptions(), singleChoiceModel.getSelection());
     }
 
     public void setChoiceSelectionListener(ChoiceSelectionListener choiceSelectionListener) {

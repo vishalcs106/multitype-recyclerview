@@ -22,6 +22,7 @@ public class CommentViewHolder extends RecyclerView.ViewHolder {
     public void bind(CommentModel commentModel){
         commentView.setPosition(getAdapterPosition());
         commentView.setCommentViewListener(commentViewListener);
+        commentView.setView(commentModel);
     }
 
     public void setCommentViewListener(CommentViewListener commentViewListener) {

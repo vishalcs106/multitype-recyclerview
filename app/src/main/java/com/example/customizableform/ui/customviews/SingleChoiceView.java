@@ -30,6 +30,7 @@ public class SingleChoiceView extends RelativeLayout {
     private String selection = "";
     private ChoiceSelectionListener choiceSelectionListener;
     private int position;
+    private RadioGroup.OnCheckedChangeListener onCheckedChangeListener;
     public SingleChoiceView(Context context) {
         super(context);
         init();
@@ -48,8 +49,7 @@ public class SingleChoiceView extends RelativeLayout {
     private void init(){
         View view = LayoutInflater.from(getContext()).inflate(R.layout.customview_singlechoice, this, true);
         ButterKnife.bind(this, view);
-
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        onCheckedChangeListener = new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 RadioButton rb = group.findViewById(checkedId);
@@ -60,8 +60,7 @@ public class SingleChoiceView extends RelativeLayout {
                 }
                 choiceSelectionListener.onSelectionChange(position, selection);
             }
-        });
-
+        };
     }
 
     public void setTitle(String title){
@@ -70,14 +69,19 @@ public class SingleChoiceView extends RelativeLayout {
         }
     }
 
-    public void setChoices(String[] choices){
+    public void setChoices(String[] choices, String selection){
         if(this.choices == null) {
+            radioGroup.setOnCheckedChangeListener(null);
             this.choices = choices;
             for (int i = 0; i < choices.length; i++) {
                 RadioButton radioButton = new RadioButton(getContext());
                 radioButton.setText(choices[i]);
+                if(choices[i].equals(selection)){
+                    radioButton.setChecked(true);
+                }
                 radioGroup.addView(radioButton);
             }
+            radioGroup.setOnCheckedChangeListener(onCheckedChangeListener);
         }
     }
 
